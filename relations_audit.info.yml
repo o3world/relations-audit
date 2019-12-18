@@ -1,0 +1,5 @@
+name: Relations Audit
+description: Export CSV files to describe entity relations structure and instances
+type: module
+version: 1.0
+core: 8.x

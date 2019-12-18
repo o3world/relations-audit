@@ -1,0 +1,7 @@
+relations_audit.structure_relations:
+  path: '/admin/config/relations-audit'
+  defaults:
+    _form: '\Drupal\relations_audit\Form\StructureRelations'
+    _title: 'StructureRelations'
+  requirements:
+    _access: 'TRUE'

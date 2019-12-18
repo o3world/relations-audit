@@ -1,0 +1,5 @@
+services:
+  relations_audit.structure:
+    class: Drupal\relations_audit\Commands\StructureRelations
+    tags:
+      -  { name: drush.command }
