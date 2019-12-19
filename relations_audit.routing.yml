@@ -4,4 +4,14 @@ relations_audit.structure_relations:
     _form: '\Drupal\relations_audit\Form\StructureRelations'
     _title: 'StructureRelations'
   requirements:
+    _permission: access administration pages
+  options:
+    _admin_route: TRUE
+
+relations_audit.api.structure_relations:
+  path: '/api/structure-relations'
+  defaults:
+    _controller: '\Drupal\relations_audit\Controller\StructureRelationsController::get'
+    _title: 'Get Structure of Relations'
+  requirements:
     _access: 'TRUE'

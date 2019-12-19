@@ -9,6 +9,16 @@ use Drush\Commands\DrushCommands;
  */
 class StructureRelations extends DrushCommands {
 
+  const COLUMN_HEADERS = [
+    'EntityType',
+    'BundleName',
+    'Bundle',
+    'FieldName',
+    'TargetEntityType',
+    'TargetBundleName',
+    'TargetBundle',
+  ];
+
 
   /**
    * Export relations structure
@@ -22,6 +32,24 @@ class StructureRelations extends DrushCommands {
    * @usage drush export-rs
    */
   public function export($options) {
+    $manifest = $this->getDataArray($options);
+    $manifest = array_merge([
+      self::COLUMN_HEADERS
+    ], $manifest);
+    $file = fopen('php://output', 'w');
+    foreach ($manifest as $lines) {
+      fputcsv($file, array_values($lines));
+    }
+    fclose($file);
+  }
+
+  /**
+   * Get data array
+   *
+   * @param array $options
+   * @return array $manifest
+   */
+  public function getDataArray($options) {
     $manifest = [];
     // Get all bundle info for reference.
     $all_bundle_info = \Drupal::service("entity_type.bundle.info")->getAllBundleInfo();
@@ -52,36 +80,27 @@ class StructureRelations extends DrushCommands {
                   ) {
                     continue;
                   }
-                  $manifest[] = [
-                    'entity_type' => $field_definition->getTargetEntityTypeId(),
-                    'bundle_name' => \Drupal::service('entity_type.bundle.info')->getBundleInfo($field_definition->getTargetEntityTypeId())[$field_definition->getTargetBundle()]['label'],
-                    'bundle' => $field_definition->getTargetBundle(),
-                    'field_name' => $field_definition->getName(),
-                    'target_entity_type' => $settings['target_type'],
-                    'target_bundle_label' => $all_bundle_info[$settings['target_type']][$target_bundle]['label'],
-                    'target_bundle' => $target_bundle,
-                  ];
+                  $manifest[] = array_combine(self::COLUMN_HEADERS, [
+                    $field_definition->getTargetEntityTypeId(),
+                    \Drupal::service('entity_type.bundle.info')->getBundleInfo($field_definition->getTargetEntityTypeId())[$field_definition->getTargetBundle()]['label'],
+                    $field_definition->getTargetBundle(),
+                    $field_definition->getName(),
+                    $settings['target_type'],
+                    $all_bundle_info[$settings['target_type']][$target_bundle]['label'],
+                    $target_bundle,
+                  ]);
                 }
             }
           };
         }
       }
     }
-    $file = fopen('php://output', 'w');
-    // Write header.
-    fputcsv($file, [
-      'EntityType',
-      'ComponentName',
-      'Bundle',
-      'FieldName',
-      'TargetEntityType',
-      'TargetName',
-      'TargetBundle',
-    ]);
-    foreach ($manifest as $lines) {
-      fputcsv($file, array_values($lines));
+    // Sort if necessary.
+    if ($options['sort_by'] && in_array($options['sort_by'], self::COLUMN_HEADERS)) {
+      $sort_by = array_column($manifest, $options['sort_by']);
+      array_multisort($sort_by, SORT_ASC, $manifest);
     }
-    fclose($file);
+    return $manifest;
   }
 
 }
