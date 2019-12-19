@@ -84,7 +84,7 @@ class StructureRelations extends DrushCommands {
     // Get all bundle info for reference.
     $all_bundle_info = $this->entityTypeBundleInfo->getAllBundleInfo();
     // Loop through all entity types.
-    foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_definition) {
+    foreach ($this->entityTypeManager->getDefinitions() as $entity_definition) {
       // Check for option: base_bundle.
       if ($options['base_entity_type'] && $entity_definition->id() !== $options['base_entity_type']) {
         continue;
