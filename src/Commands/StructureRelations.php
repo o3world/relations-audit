@@ -5,7 +5,7 @@ namespace Drupal\relations_audit\Commands;
 use Drush\Commands\DrushCommands;
 
 /**
- * Migrates the full width CTA from under content sections to the full width CTA fields
+ * Export relations structure
  */
 class StructureRelations extends DrushCommands {
 
