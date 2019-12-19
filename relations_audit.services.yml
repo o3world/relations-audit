@@ -1,3 +1,7 @@
 services:
   relations_audit.structure:
     class: Drupal\relations_audit\Commands\StructureRelations
+    arguments:
+      - '@entity_type.bundle.info'
+      - '@entity_type.manager'
+      - '@entity_field.manager'

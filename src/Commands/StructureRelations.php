@@ -2,6 +2,9 @@
 
 namespace Drupal\relations_audit\Commands;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -18,6 +21,33 @@ class StructureRelations extends DrushCommands {
     'TargetBundleName',
     'TargetBundle',
   ];
+
+  /**
+   * Entity type bundle info service
+   *
+   * @var EntityTypeBundleInfoInterface
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
+   * Entity type manager service
+   *
+   * @var EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Entity type bundle interface service
+   *
+   * @var EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  public function __construct(EntityTypeBundleInfoInterface $EntityTypeBundleInfo, EntityTypeManagerInterface $EntityTypeManager, EntityFieldManagerInterface $EntityFieldManager) {
+    $this->entityTypeBundleInfo = $EntityTypeBundleInfo;
+    $this->entityTypeManager = $EntityTypeManager;
+    $this->entityFieldManager = $EntityFieldManager;
+  }
 
 
   /**
@@ -52,7 +82,7 @@ class StructureRelations extends DrushCommands {
   public function getDataArray($options) {
     $manifest = [];
     // Get all bundle info for reference.
-    $all_bundle_info = \Drupal::service("entity_type.bundle.info")->getAllBundleInfo();
+    $all_bundle_info = $this->entityTypeBundleInfo->getAllBundleInfo();
     // Loop through all entity types.
     foreach (\Drupal::entityTypeManager()->getDefinitions() as $entity_definition) {
       // Check for option: base_bundle.
@@ -60,14 +90,14 @@ class StructureRelations extends DrushCommands {
         continue;
       }
       // Loop through bundles of the entity types
-      foreach (\Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_definition->id()) as $bundle => $bundle_data) {
+      foreach ($this->entityTypeBundleInfo->getBundleInfo($entity_definition->id()) as $bundle => $bundle_data) {
         // Check for option: base_bundle.
         if ($options['base_bundle'] && $bundle !== $options['base_bundle']) {
           continue;
         }
         // Only select entities that are fieldable.
         if (in_array('Drupal\Core\Entity\FieldableEntityInterface', class_implements($entity_definition->getOriginalClass()))) {
-          $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_definition->id(), $bundle);
+          $field_definitions = $this->entityFieldManager->getFieldDefinitions($entity_definition->id(), $bundle);
           foreach ($field_definitions as $field_definition) {
             $settings = $field_definition->getSettings();
             if (in_array($field_definition->getType(), ['entity_reference' , 'entity_reference_revisions']) &&
@@ -82,7 +112,7 @@ class StructureRelations extends DrushCommands {
                   }
                   $manifest[] = array_combine(self::COLUMN_HEADERS, [
                     $field_definition->getTargetEntityTypeId(),
-                    \Drupal::service('entity_type.bundle.info')->getBundleInfo($field_definition->getTargetEntityTypeId())[$field_definition->getTargetBundle()]['label'],
+                    $this->entityTypeBundleInfo->getBundleInfo($field_definition->getTargetEntityTypeId())[$field_definition->getTargetBundle()]['label'],
                     $field_definition->getTargetBundle(),
                     $field_definition->getName(),
                     $settings['target_type'],
