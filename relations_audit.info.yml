@@ -3,3 +3,5 @@ description: Export CSV files to describe entity relations structure and instanc
 type: module
 version: 1.0
 core: 8.x
+dependencies:
+  - basic_auth
