@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+    function sendCredentials() {
+      var url=$('#url').val();
+      var user=$('#user').val();
+      var pass=$('#pass').val();
+      if (url && user && pass) {
+        $('#form').html('Processing ...');
+        google.script.run
+        .withSuccessHandler(closeDialog)
+        .o3DrupalComponentAudit(url, user,pass);
+      }
+    }
+    function closeDialog() {
+      google.script.host.close();
+    }
+  </script>
+  </head>
+  <body>
+    <div id="form">
+      Website URL: <input id="url" type="text" name="url"><br>
+      Username: <input id="user" type="text" name="user"><br>
+      Password: <input id="pass" type="text" name="pass"><br>
+      <input id="submit-btn" type="button" value="submit" onClick="sendCredentials()" />
+    </div>
+  </body>
+</html>
